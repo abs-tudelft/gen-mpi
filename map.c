@@ -10,6 +10,13 @@
 #include "bseq.h"
 #include "khash.h"
 
+#include <mpi.h>
+#include <dirent.h>
+#include <libgen.h>
+
+const char *dname;
+FILE *fname[26];
+
 struct mm_tbuf_s {
 	void *km;
 	int rep_len, frag_gap;
@@ -593,14 +600,220 @@ static void *worker_pipeline(void *shared, int step, void *in)
 							mm_write_sam3(&p->str, mi, t, i - seg_st, j, s->n_seg[k], &s->n_reg[seg_st], (const mm_reg1_t*const*)&s->reg[seg_st], km, p->opt->flag, s->rep_len[i]);
 						else
 							mm_write_paf3(&p->str, mi, t, r, km, p->opt->flag, s->rep_len[i]);
-						mm_err_puts(p->str.s);
+						//mm_err_puts(p->str.s);
+						if (strcmp(t->refID, "chr1")==0)  
+						{
+							err_fputs(p->str.s, fname[0]);
+						}
+						else if (strcmp(t->refID, "chr2")==0)
+						{
+							err_fputs(p->str.s, fname[1]);
+						}
+						else if (strcmp(t->refID, "chr3")==0) 
+						{
+							err_fputs(p->str.s, fname[2]);
+						}
+						else if (strcmp(t->refID, "chr4")==0) 
+						{
+							err_fputs(p->str.s, fname[3]);
+						}
+						else if (strcmp(t->refID, "chr5")==0) 
+						{
+							err_fputs(p->str.s, fname[4]);
+						}
+						else if (strcmp(t->refID, "chr6")==0) 
+						{
+							err_fputs(p->str.s, fname[5]);
+						}
+						else if  (strcmp(t->refID, "chr7")==0) 
+						{
+							err_fputs(p->str.s, fname[6]);
+						}
+						else if (strcmp(t->refID, "chr8")==0)
+						{
+							err_fputs(p->str.s, fname[7]);
+						}
+						else if  (strcmp(t->refID, "chr9")==0)
+						{
+							err_fputs(p->str.s, fname[8]);
+						}
+						else if (strcmp(t->refID, "chr10")==0) 
+						{
+							err_fputs(p->str.s, fname[9]);
+						}
+						else if  (strcmp(t->refID, "chr11")==0) 
+						{
+							err_fputs(p->str.s, fname[10]);
+						}
+						else if (strcmp(t->refID, "chr12")==0) 
+						{
+							err_fputs(p->str.s, fname[11]);
+						}
+						else if (strcmp(t->refID, "chr13")==0) 
+						{
+							err_fputs(p->str.s, fname[12]);
+						}
+						else if (strcmp(t->refID, "chr14")==0) 
+						{
+							err_fputs(p->str.s, fname[13]);
+						}
+						else if (strcmp(t->refID, "chr15")==0) 
+						{
+							err_fputs(p->str.s, fname[14]);
+						}
+						else if (strcmp(t->refID, "chr16")==0) 
+						{
+							err_fputs(p->str.s, fname[15]);
+						}
+						else if (strcmp(t->refID, "chr17")==0) 
+						{
+							err_fputs(p->str.s, fname[16]);
+						}
+						else if (strcmp(t->refID, "chr18")==0) 
+						{
+							err_fputs(p->str.s, fname[17]);
+						}
+						else if (strcmp(t->refID, "chr19")==0) 
+						{
+							err_fputs(p->str.s, fname[18]);
+						}
+						else if (strcmp(t->refID, "chr20")==0) 
+						{
+							err_fputs(p->str.s, fname[19]);
+						}
+						else if (strcmp(t->refID, "chr21")==0) 
+						{
+							err_fputs(p->str.s, fname[20]);
+						}
+						else if (strcmp(t->refID, "chr22")==0) 
+						{
+							err_fputs(p->str.s, fname[21]);
+						}
+						else if (strcmp(t->refID, "chrX")==0) 
+						{
+							err_fputs(p->str.s, fname[22]);
+						}
+						else if (strcmp(t->refID, "chrY")==0) 
+						{
+							err_fputs(p->str.s, fname[23]);
+						}
+						else if (strcmp(t->refID, "chrM")==0) 
+						{
+							err_fputs(p->str.s, fname[24]);
+						}
+						else{
+							err_fputs(p->str.s, fname[25]);
+						}	
 					}
 				} else if ((p->opt->flag & MM_F_PAF_NO_HIT) || ((p->opt->flag & MM_F_OUT_SAM) && !(p->opt->flag & MM_F_SAM_HIT_ONLY))) { // output an empty hit, if requested
 					if (p->opt->flag & MM_F_OUT_SAM)
 						mm_write_sam3(&p->str, mi, t, i - seg_st, -1, s->n_seg[k], &s->n_reg[seg_st], (const mm_reg1_t*const*)&s->reg[seg_st], km, p->opt->flag, s->rep_len[i]);
 					else
 						mm_write_paf3(&p->str, mi, t, 0, 0, p->opt->flag, s->rep_len[i]);
-					mm_err_puts(p->str.s);
+					//mm_err_puts(p->str.s);
+					if (strcmp(t->refID, "chr1")==0)  
+					{
+						err_fputs(p->str.s, fname[0]);
+					}
+					else if (strcmp(t->refID, "chr2")==0)
+					{
+						err_fputs(p->str.s, fname[1]);
+					}
+					else if (strcmp(t->refID, "chr3")==0) 
+					{
+						err_fputs(p->str.s, fname[2]);
+					}
+					else if (strcmp(t->refID, "chr4")==0) 
+					{
+						err_fputs(p->str.s, fname[3]);
+					}
+					else if (strcmp(t->refID, "chr5")==0) 
+					{
+						err_fputs(p->str.s, fname[4]);
+					}
+					else if (strcmp(t->refID, "chr6")==0) 
+					{
+						err_fputs(p->str.s, fname[5]);
+					}
+					else if  (strcmp(t->refID, "chr7")==0) 
+					{
+						err_fputs(p->str.s, fname[6]);
+					}
+					else if (strcmp(t->refID, "chr8")==0)
+					{
+						err_fputs(p->str.s, fname[7]);
+					}
+					else if  (strcmp(t->refID, "chr9")==0)
+					{
+						err_fputs(p->str.s, fname[8]);
+					}
+					else if (strcmp(t->refID, "chr10")==0) 
+					{
+						err_fputs(p->str.s, fname[9]);
+					}
+					else if  (strcmp(t->refID, "chr11")==0) 
+					{
+						err_fputs(p->str.s, fname[10]);
+					}
+					else if (strcmp(t->refID, "chr12")==0) 
+					{
+						err_fputs(p->str.s, fname[11]);
+					}
+					else if (strcmp(t->refID, "chr13")==0) 
+					{
+						err_fputs(p->str.s, fname[12]);
+					}
+					else if (strcmp(t->refID, "chr14")==0) 
+					{
+						err_fputs(p->str.s, fname[13]);
+					}
+					else if (strcmp(t->refID, "chr15")==0) 
+					{
+						err_fputs(p->str.s, fname[14]);
+					}
+					else if (strcmp(t->refID, "chr16")==0) 
+					{
+						err_fputs(p->str.s, fname[15]);
+					}
+					else if (strcmp(t->refID, "chr17")==0) 
+					{
+						err_fputs(p->str.s, fname[16]);
+					}
+					else if (strcmp(t->refID, "chr18")==0) 
+					{
+						err_fputs(p->str.s, fname[17]);
+					}
+					else if (strcmp(t->refID, "chr19")==0) 
+					{
+						err_fputs(p->str.s, fname[18]);
+					}
+					else if (strcmp(t->refID, "chr20")==0) 
+					{
+						err_fputs(p->str.s, fname[19]);
+					}
+					else if (strcmp(t->refID, "chr21")==0) 
+					{
+						err_fputs(p->str.s, fname[20]);
+					}
+					else if (strcmp(t->refID, "chr22")==0) 
+					{
+						err_fputs(p->str.s, fname[21]);
+					}
+					else if (strcmp(t->refID, "chrX")==0) 
+					{
+						err_fputs(p->str.s, fname[22]);
+					}
+					else if (strcmp(t->refID, "chrY")==0) 
+					{
+						err_fputs(p->str.s, fname[23]);
+					}
+					else if (strcmp(t->refID, "chrM")==0) 
+					{
+						err_fputs(p->str.s, fname[24]);
+					}
+					else{
+						err_fputs(p->str.s, fname[25]);
+					}
 				}
 			}
 			for (i = seg_st; i < seg_en; ++i) {
@@ -622,26 +835,60 @@ static void *worker_pipeline(void *shared, int step, void *in)
 
 static mm_bseq_file_t **open_bseqs(int n, const char **fn)
 {
-	mm_bseq_file_t **fp;
-	int i, j;
-	fp = (mm_bseq_file_t**)calloc(n, sizeof(mm_bseq_file_t*));
-	for (i = 0; i < n; ++i) {
-		if ((fp[i] = mm_bseq_open(fn[i])) == 0) {
-			if (mm_verbose >= 1)
-				fprintf(stderr, "ERROR: failed to open file '%s': %s\n", fn[i], strerror(errno));
-			for (j = 0; j < i; ++j)
-				mm_bseq_close(fp[j]);
-			free(fp);
-			return 0;
-		}
-	}
-	return fp;
+        mm_bseq_file_t **fp;
+        int i, j;
+
+        int world_size;
+        MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+        int world_rank;
+        MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+
+        struct dirent **namelist;
+        int nfiles;
+        nfiles = scandir(dname, &namelist, 0, alphasort);
+        const char *qfile=concatenate(dname, namelist[world_rank+2]->d_name);
+        
+        fp = (mm_bseq_file_t**)calloc(n, sizeof(mm_bseq_file_t*));
+
+        if(n>1)
+        {
+          for (i = 0; i < n; ++i) {
+                fprintf(stderr, "Opening file: %s\n", fn[i]);
+                if ((fp[i] = mm_bseq_open(fn[i])) == 0) {
+                        if (mm_verbose >= 1)
+                                fprintf(stderr, "ERROR: failed to open file '%s': %s\n", fn[i], strerror(errno));
+                        for (j = 0; j < i; ++j)
+                                mm_bseq_close(fp[j]);
+                        free(fp);
+                        return 0;
+                }
+          }
+        }
+        else {
+          if ((fp[0] = mm_bseq_open(qfile)) == 0) {
+              if (mm_verbose >= 1)
+                  fprintf(stderr, "ERROR: failed to open file '%s': %s\n", qfile, strerror(errno));
+              mm_bseq_close(fp[0]);
+              free(fp[0]);
+              return 0; }
+        }
+
+        return fp;
 }
+
 
 int mm_map_file_frag(const mm_idx_t *idx, int n_segs, const char **fn, const mm_mapopt_t *opt, int n_threads)
 {
 	int i, pl_threads;
 	pipeline_t pl;
+
+	/*const char *output=concatenate(dname, "output/");
+	for(int f=0; f<26; f++){
+	  char ext[8]= "";
+          snprintf(ext, sizeof(ext), "%i.sam", f);
+	  fname[f]=fopen(concatenate(output, ext), "a+");
+	}*/
+
 	if (n_segs < 1) return -1;
 	memset(&pl, 0, sizeof(pipeline_t));
 	pl.n_fp = n_segs;
@@ -660,6 +907,9 @@ int mm_map_file_frag(const mm_idx_t *idx, int n_segs, const char **fn, const mm_
 	for (i = 0; i < pl.n_fp; ++i)
 		mm_bseq_close(pl.fp[i]);
 	free(pl.fp);
+	
+	//for(int f=0; f<26; f++) fclose(fname[f]);
+
 	return 0;
 }
 

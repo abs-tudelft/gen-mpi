@@ -100,6 +100,27 @@ double cputime(void)
 	return r.ru_utime.tv_sec + r.ru_stime.tv_sec + 1e-6 * (r.ru_utime.tv_usec + r.ru_stime.tv_usec);
 }
 
+char *concatenate(const char *a, const char *b) {
+    size_t alen = strlen(a);
+    size_t blen = strlen(b);
+    char *res = malloc(alen + blen + 1);
+    if (res) {
+        memcpy(res, a, alen);
+        memcpy(res + alen, b, blen +1);
+    }
+    return res;
+}
+
+int err_fputs(const char *s, FILE *stream)
+{
+	int ret = fputs(s, stream);
+	if (EOF == ret)
+	{
+	       fprintf(stderr,"fputs error");//_err_fatal_simple("fputs", strerror(errno));
+	}
+
+	return ret;
+}
 long peakrss(void)
 {
 	struct rusage r;

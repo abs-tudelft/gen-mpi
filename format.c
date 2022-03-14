@@ -6,6 +6,10 @@
 #include "kalloc.h"
 #include "mmpriv.h"
 
+#include <mpi.h>
+
+FILE *fname[26];
+
 static char mm_rg_id[256];
 
 static inline void str_enlarge(kstring_t *s, int l)
@@ -119,6 +123,19 @@ int mm_write_sam_hdr(const mm_idx_t *idx, const char *rg, const char *ver, int a
 {
 	kstring_t str = {0,0,0};
 	int ret = 0;
+
+        int world_size;
+        MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+        int world_rank;
+        MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+        
+	char processor_name[MPI_MAX_PROCESSOR_NAME];
+        int name_len;
+        MPI_Get_processor_name(processor_name, &name_len);
+
+        fprintf(stderr,"Hello world from processor %s, rank %d \n",
+         processor_name, world_rank);
+
 	if (idx) {
 		uint32_t i;
 		for (i = 0; i < idx->n_seq; ++i)
@@ -130,10 +147,15 @@ int mm_write_sam_hdr(const mm_idx_t *idx, const char *rg, const char *ver, int a
 	if (argc > 1) {
 		int i;
 		mm_sprintf_lite(&str, "\tCL:minimap2");
-		for (i = 1; i < argc; ++i)
-			mm_sprintf_lite(&str, " %s", argv[i]);
+		for (i = 1; i < argc; ++i){
+			if(i==argc-1) mm_sprintf_lite(&str, " %s\n", argv[i]);
+			else mm_sprintf_lite(&str, " %s", argv[i]);
 	}
-	mm_err_puts(str.s);
+	}
+	if(world_rank==0) {
+		for(int f=0; f<26; f++) err_fputs(str.s, fname[f]);
+	}//mm_err_puts(str.s);
+	
 	free(str.s);
 	return ret;
 }
@@ -299,7 +321,7 @@ static inline void write_tags(kstring_t *s, const mm_reg1_t *r)
 	if (r->split) mm_sprintf_lite(s, "\tzd:i:%d", r->split);
 }
 
-void mm_write_paf3(kstring_t *s, const mm_idx_t *mi, const mm_bseq1_t *t, const mm_reg1_t *r, void *km, int64_t opt_flag, int rep_len)
+void mm_write_paf3(kstring_t *s, const mm_idx_t *mi, mm_bseq1_t *t, const mm_reg1_t *r, void *km, int64_t opt_flag, int rep_len)
 {
 	s->l = 0;
 	if (r == 0) {
@@ -331,7 +353,7 @@ void mm_write_paf3(kstring_t *s, const mm_idx_t *mi, const mm_bseq1_t *t, const 
 		mm_sprintf_lite(s, "\t%s", t->comment);
 }
 
-void mm_write_paf(kstring_t *s, const mm_idx_t *mi, const mm_bseq1_t *t, const mm_reg1_t *r, void *km, int64_t opt_flag)
+void mm_write_paf(kstring_t *s, const mm_idx_t *mi, mm_bseq1_t *t, const mm_reg1_t *r, void *km, int64_t opt_flag)
 {
 	mm_write_paf3(s, mi, t, r, km, opt_flag, -1);
 }
@@ -386,7 +408,7 @@ static void write_sam_cigar(kstring_t *s, int sam_flag, int in_tag, int qlen, co
 	}
 }
 
-void mm_write_sam3(kstring_t *s, const mm_idx_t *mi, const mm_bseq1_t *t, int seg_idx, int reg_idx, int n_seg, const int *n_regss, const mm_reg1_t *const* regss, void *km, int64_t opt_flag, int rep_len)
+void mm_write_sam3(kstring_t *s, const mm_idx_t *mi, mm_bseq1_t *t, int seg_idx, int reg_idx, int n_seg, const int *n_regss, const mm_reg1_t *const* regss, void *km, int64_t opt_flag, int rep_len)
 {
 	const int max_bam_cigar_op = 65535;
 	int flag, n_regs = n_regss[seg_idx], cigar_in_tag = 0;
@@ -436,10 +458,26 @@ void mm_write_sam3(kstring_t *s, const mm_idx_t *mi, const mm_bseq1_t *t, int se
 	if (r == 0) {
 		if (r_prev) {
 			this_rid = r_prev->rid, this_pos = r_prev->rs;
+			
+			//Tnvyr
+                        t->refID = malloc(strlen(mi->seq[this_rid].name)+1);
+		        strcpy(t->refID, mi->seq[this_rid].name);
+                        t->beginPos = this_pos + 1;
+
 			mm_sprintf_lite(s, "\t%s\t%d\t0\t*", mi->seq[this_rid].name, this_pos+1);
-		} else mm_sprintf_lite(s, "\t*\t0\t0\t*");
-	} else {
+		} else {//Tnvyr
+                        t->refID=malloc(2);
+                        t->refID[0] = '*';t->refID[1] = '\0';
+	                t->beginPos = 0;
+			mm_sprintf_lite(s, "\t*\t0\t0\t*");}
+	} else {                
 		this_rid = r->rid, this_pos = r->rs;
+		
+		//Tnvyr
+                t->refID = malloc(strlen(mi->seq[r->rid].name)+1);
+		strcpy(t->refID, mi->seq[r->rid].name);
+                t->beginPos = r->rs + 1;
+
 		mm_sprintf_lite(s, "\t%s\t%d\t%d\t", mi->seq[r->rid].name, r->rs+1, r->mapq);
 		if ((opt_flag & MM_F_LONG_CIGAR) && r->p && r->p->n_cigar > max_bam_cigar_op - 2) {
 			int n_cigar = r->p->n_cigar;
@@ -537,7 +575,7 @@ void mm_write_sam3(kstring_t *s, const mm_idx_t *mi, const mm_bseq1_t *t, int se
 		if (cigar_in_tag)
 			write_sam_cigar(s, flag, 1, t->l_seq, r, opt_flag);
 	}
-	if (rep_len >= 0) mm_sprintf_lite(s, "\trl:i:%d", rep_len);
+	if (rep_len >= 0) mm_sprintf_lite(s, "\trl:i:%d\n", rep_len);
 
 	if ((opt_flag & MM_F_COPY_COMMENT) && t->comment)
 		mm_sprintf_lite(s, "\t%s", t->comment);
@@ -545,12 +583,12 @@ void mm_write_sam3(kstring_t *s, const mm_idx_t *mi, const mm_bseq1_t *t, int se
 	s->s[s->l] = 0; // we always have room for an extra byte (see str_enlarge)
 }
 
-void mm_write_sam2(kstring_t *s, const mm_idx_t *mi, const mm_bseq1_t *t, int seg_idx, int reg_idx, int n_seg, const int *n_regss, const mm_reg1_t *const* regss, void *km, int64_t opt_flag)
+void mm_write_sam2(kstring_t *s, const mm_idx_t *mi, mm_bseq1_t *t, int seg_idx, int reg_idx, int n_seg, const int *n_regss, const mm_reg1_t *const* regss, void *km, int64_t opt_flag)
 {
 	mm_write_sam3(s, mi, t, seg_idx, reg_idx, n_seg, n_regss, regss, km, opt_flag, -1);
 }
 
-void mm_write_sam(kstring_t *s, const mm_idx_t *mi, const mm_bseq1_t *t, const mm_reg1_t *r, int n_regs, const mm_reg1_t *regs)
+void mm_write_sam(kstring_t *s, const mm_idx_t *mi, mm_bseq1_t *t, const mm_reg1_t *r, int n_regs, const mm_reg1_t *regs)
 {
 	int i;
 	for (i = 0; i < n_regs; ++i)

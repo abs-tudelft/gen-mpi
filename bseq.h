@@ -14,6 +14,8 @@ typedef struct mm_bseq_file_s mm_bseq_file_t;
 typedef struct {
 	int l_seq, rid;
 	char *name, *seq, *qual, *comment;
+	char *refID;
+	int beginPos;
 } mm_bseq1_t;
 
 mm_bseq_file_t *mm_bseq_open(const char *fn);

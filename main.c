@@ -7,6 +7,9 @@
 #include "mmpriv.h"
 #include "ketopt.h"
 
+#include <mpi.h>
+#include <libgen.h>
+
 #define MM_VERSION "2.22-r1110-dirty"
 
 #ifdef __linux__
@@ -22,6 +25,9 @@ void liftrlimit()
 #else
 void liftrlimit() {}
 #endif
+
+extern const char *dname="";
+extern FILE *fname[26];
 
 static ko_longopt_t long_options[] = {
 	{ "bucket-bits",    ko_required_argument, 300 },
@@ -129,11 +135,13 @@ int main(int argc, char *argv[])
 	mm_idx_reader_t *idx_rdr;
 	mm_idx_t *mi;
 
+	//MPI_Init(NULL, NULL);
+
 	mm_verbose = 3;
 	liftrlimit();
 	mm_realtime0 = realtime();
 	mm_set_opt(0, &ipt, &opt);
-
+	
 	while ((c = ketopt(&o, argc, argv, 1, opt_str, long_options)) >= 0) { // test command line options and apply option -x/preset first
 		if (c == 'x') {
 			if (mm_set_opt(o.arg, &ipt, &opt) < 0) {
@@ -365,6 +373,19 @@ int main(int argc, char *argv[])
 		fprintf(fp_help, "\nSee `man ./minimap2.1' for detailed description of these and other advanced command-line options.\n");
 		return fp_help == stdout? 0 : 1;
 	}
+        MPI_Init(NULL, NULL);
+	int world_size;
+        MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+        int world_rank;
+        MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+
+	dname=concatenate(dirname(argv[o.ind + 1]),"/parts/");
+       
+	for(int f=0; f<26; f++){
+          char ext[25]= "";
+          snprintf(ext, sizeof(ext), "/output/%d_output_%02d.sam", world_rank, f);
+          fname[f]=fopen(concatenate((const char**)&argv[o.ind + 1][0], ext), "a+");
+        }
 
 	if ((opt.flag & MM_F_SR) && argc - o.ind > 3) {
 		fprintf(stderr, "[ERROR] incorrect input: in the sr mode, please specify no more than two query files.\n");
@@ -451,5 +472,10 @@ int main(int argc, char *argv[])
 			fprintf(stderr, " %s", argv[i]);
 		fprintf(stderr, "\n[M::%s] Real time: %.3f sec; CPU: %.3f sec; Peak RSS: %.3f GB\n", __func__, realtime() - mm_realtime0, cputime(), peakrss() / 1024.0 / 1024.0 / 1024.0);
 	}
+
+	//MPI_Finalize();
+	for(int f=0; f<26; f++) fclose(fname[f]);
+	MPI_Finalize();
+
 	return 0;
 }
