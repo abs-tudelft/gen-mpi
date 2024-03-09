@@ -17,6 +17,9 @@ Tools
 seqkit
 samtools
 sambamba
+vcftools
+whatshap
+GATK
 ```
 Aligners
 ```
