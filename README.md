@@ -56,4 +56,4 @@ time srun -N 2 -n 2 /home/tahmad/hawk/new/pc/minimap2-chrms/minimap2 -t 128 -ax 
 #run parallel MPI variant calling on cluster
 time srun -N 1 -n 1 ~/hawk/long/queue_long /scratch-shared/tahmad/bio_data/reference/GRCh38_no_alt_analysis_set.fasta /scratch-shared/tahmad/bio_data/long/HG002/ONT/output/ /home/tahmad/tahmad/tools/ 1
 ```
-Tanveer Ahmad et al., "GenMPI: Cluster Scalable Variant Calling for Short/Long Reads Sequencing Data", [biorxiv] (https://www.biorxiv.org/content/10.1101/2022.04.01.486779v1.full)
+Tanveer Ahmad et al., "GenMPI: Cluster Scalable Variant Calling for Short/Long Reads Sequencing Data", available at: [biorxiv](https://www.biorxiv.org/content/10.1101/2022.04.01.486779v1.full)
