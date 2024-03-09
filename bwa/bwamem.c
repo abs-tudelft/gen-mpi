@@ -6,7 +6,6 @@
 #include <limits.h>
 #include <math.h>
 
-
 #ifdef HAVE_PTHREAD
 #include <pthread.h>
 #endif
