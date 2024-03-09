@@ -6,6 +6,7 @@
 #SBATCH -p thin
 #SBATCH --output=workflow.out
 
+
 module load 2021
 module load impi/2021.2.0-intel-compilers-2021.2.0
 
