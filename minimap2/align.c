@@ -6,6 +6,7 @@
 #include "mmpriv.h"
 #include "ksw2.h"
 
+
 static void ksw_gen_simple_mat(int m, int8_t *mat, int8_t a, int8_t b, int8_t sc_ambi)
 {
 	int i, j;
