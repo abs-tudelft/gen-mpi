@@ -44,6 +44,8 @@ Whatshap
 ```
 
 ## Usage:
+Note: We are using singilarity containers images for DeepVariant, Octopus, Clair3, Whatshap.
+
 ### For short-reads 
 ```
 #split FASTQ
