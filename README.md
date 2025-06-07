@@ -12,14 +12,12 @@ Compiler
 ```
 MPI runtime (impi/2021.2.0-intel-compilers-2021.2.0)
 ```
-Tools
+Make sure you have installed following tools:
 ```
 seqkit
 samtools
 sambamba
 vcftools
-whatshap
-GATK
 ```
 Aligners
 ```
@@ -36,14 +34,15 @@ To use minimap2 aligner, make sure you have above mentioned MPI complier install
 cd minimap2; make
 ```
 
-All other 
-
-Variant Callers
+All other Variant Callers and phasing tools to be installed as required:
 ```
 DeepVariant
 Clair3
 Octopus
+GATK
+Whatshap
 ```
+
 
 ## Usage:
 ### For short-reads 
