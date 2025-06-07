@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
 
       if(argv[5]=="octopus"){
       
-        sprintf(vc_cmd, "singularity exec /scratch-shared/tahmad/images/octopus_latest.sif octopus --threads %d  --reference %s  --reads %s%02d.bam -T %s --sequence-error-model PCRF.NovaSeq --forest /opt/octopus/resources/forests/germline.v0.7.4.forest -o %s%s.vcf.gz", atoi(cores), argv[1], argv[2], file, CHRMS[file], argv[2], CHRMS[file]);
+        sprintf(vc_cmd, "singularity exec octopus_latest.sif octopus --threads %d  --reference %s  --reads %s%02d.bam -T %s --sequence-error-model PCRF.NovaSeq --forest /opt/octopus/resources/forests/germline.v0.7.4.forest -o %s%s.vcf.gz", atoi(cores), argv[1], argv[2], file, CHRMS[file], argv[2], CHRMS[file]);
         fprintf(stderr,"vc_cmd: %s\n", vc_cmd);
         system(vc_cmd);
       
@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
 
       else if(argv[5]=="deepvariant"){
 
-        sprintf(vc_cmd, "singularity run -B /usr/lib/locale/:/usr/lib/locale/ /scratch-shared/tahmad/images/deepvariant_1.1.0.sif /opt/deepvariant/bin/run_deepvariant --model_type WGS --ref %s --reads %s%02d.bam --output_vcf %s%s.dv.vcf.gz --intermediate_results_dir %s%s_deepvariant --num_shards %d --regions %s", argv[1], argv[2], file, argv[2], CHRMS[file], argv[2], CHRMS[file], atoi(cores), CHRMS[file]);
+        sprintf(vc_cmd, "singularity run -B /usr/lib/locale/:/usr/lib/locale/ deepvariant_1.1.0.sif /opt/deepvariant/bin/run_deepvariant --model_type WGS --ref %s --reads %s%02d.bam --output_vcf %s%s.dv.vcf.gz --intermediate_results_dir %s%s_deepvariant --num_shards %d --regions %s", argv[1], argv[2], file, argv[2], CHRMS[file], argv[2], CHRMS[file], atoi(cores), CHRMS[file]);
         //sprintf(vc_cmd, "singularity run --nv -B /usr/lib/locale/:/usr/lib/locale/ docker://google/deepvariant:1.2.0-gpu /opt/deepvariant/bin/run_deepvariant --model_type PACBIO --ref %s --reads %s%02d.bam --output_vcf %s%s.vcf.gz --intermediate_results_dir %s%s_deepvariant --num_shards %d --regions %s", argv[1], argv[2], file, argv[2], CHRMS[file], argv[2], CHRMS[file], atoi(cores), CHRMS[file]);
         fprintf(stderr,"vc_cmd: %s\n", vc_cmd);
         system(vc_cmd);
@@ -104,15 +104,15 @@ int main(int argc, char *argv[]) {
 
       else if(argv[5]=="gatk"){
 
-        sprintf(bqsr_cmd, "java -jar %sgatk.jar BaseRecalibrator -R /scratch-shared/tahmad/bio_data/short/HG002/gatk/Homo_sapiens_assembly38.fasta -L %s  -I %s%02d.bam --known-sites  /scratch-shared/tahmad/bio_data/short/HG002/gatk/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz --known-sites /scratch-shared/tahmad/bio_data/short/HG002/gatk/Homo_sapiens_assembly38.dbsnp138.vcf --known-sites /scratch-shared/tahmad/bio_data/short/HG002/gatk/Homo_sapiens_assembly38.known_indels.vcf.gz  -O %s%s.table",argv[3], CHRMS[file], argv[2], file, argv[2], CHRMS[file]);
+        sprintf(bqsr_cmd, "java -jar %sgatk.jar BaseRecalibrator -R gatk/Homo_sapiens_assembly38.fasta -L %s  -I %s%02d.bam --known-sites  gatk/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz --known-sites gatk/Homo_sapiens_assembly38.dbsnp138.vcf --known-sites gatk/Homo_sapiens_assembly38.known_indels.vcf.gz  -O %s%s.table",argv[3], CHRMS[file], argv[2], file, argv[2], CHRMS[file]);
         fprintf(stderr,"bqsr_cmd: %s\n", bqsr_cmd);
         system(bqsr_cmd);
 
-        sprintf(applybqsr_cmd, "java -jar %sgatk.jar ApplyBQSR -R /scratch-shared/tahmad/bio_data/short/HG002/gatk/Homo_sapiens_assembly38.fasta  -L %s -I %s%02d.bam -bqsr %s%s.table -O %s%s.bam", argv[3], CHRMS[file], argv[2], file, argv[2], CHRMS[file], argv[2], CHRMS[file]);
+        sprintf(applybqsr_cmd, "java -jar %sgatk.jar ApplyBQSR -R gatk/Homo_sapiens_assembly38.fasta  -L %s -I %s%02d.bam -bqsr %s%s.table -O %s%s.bam", argv[3], CHRMS[file], argv[2], file, argv[2], CHRMS[file], argv[2], CHRMS[file]);
         fprintf(stderr,"applybqsr_cmd: %s\n", applybqsr_cmd);
         system(applybqsr_cmd);
 
-        sprintf(vc_cmd, "java -jar %sgatk.jar HaplotypeCaller -R /scratch-shared/tahmad/bio_data/short/HG002/gatk/Homo_sapiens_assembly38.fasta -L %s -I %s%s.bam -O %s%s.vcf.gz", argv[3], CHRMS[file], argv[2], CHRMS[file], argv[2], CHRMS[file]);
+        sprintf(vc_cmd, "java -jar %sgatk.jar HaplotypeCaller -R gatk/Homo_sapiens_assembly38.fasta -L %s -I %s%s.bam -O %s%s.vcf.gz", argv[3], CHRMS[file], argv[2], CHRMS[file], argv[2], CHRMS[file]);
         fprintf(stderr,"vc_cmd: %s\n", vc_cmd);
         system(vc_cmd);
       
