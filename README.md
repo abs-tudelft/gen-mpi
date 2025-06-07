@@ -26,6 +26,14 @@ Aligners
 bwa
 minimap2
 ```
+To use bwa-mem aligner, make sure you have above mentioned MPI complier installed: 
+```cd bwa; make```
+
+To use minimap2 aligner, make sure you have above mentioned MPI complier installed:
+```cd minimap2; make```
+
+All other 
+
 Variant Callers
 ```
 DeepVariant
