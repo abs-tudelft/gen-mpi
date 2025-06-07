@@ -43,28 +43,33 @@ GATK
 Whatshap
 ```
 
-
 ## Usage:
 ### For short-reads 
 ```
 #split FASTQ
-/home/tahmad/tahmad/seqkit split2 --threads=128 -1 /scratch-shared/tahmad/bio_data/long/HG002/HG002.fastq -p 8 -O /scratch-shared/tahmad/bio_data/long/HG002/parts -f
+seqkit split2 --threads=128 -1 HG002.fastq -p 8 -O HG002/parts -f
 
 #run MPI bwa aligner implementation on cluster
-time srun -N 2 -n 2 /home/tahmad/hawk/new/pc/minimap2-chrms/minimap2 -t 128 -ax map-ont -R '@RG\tID:None\tSM:sample\tPL:Pacbio\tLB:sample\tPU:lane' /scratch-shared/tahmad/bio_data/reference/GRCh38_no_alt_analysis_set.fasta /scratch-shared/tahmad/bio_data/long/HG002/ONT/HG002.fastq > /scratch-shared/tahmad/bio_data/long/HG002/ONT/out.sam
+time srun -N 2 -n 2 minimap2 -t 128 -ax map-ont -R '@RG\tID:None\tSM:sample\tPL:Pacbio\tLB:sample\tPU:lane' reference/GRCh38_no_alt_analysis_set.fasta ONT/HG002.fastq > ONT/out.sam
+
+#Compile the simple `queue_short.c` script which runs the whole variant calling worlflow
+gcc queue_short.c -o queue_short
 
 #run parallel MPI variant calling on cluster
-time srun -N 1 -n 1 ~/hawk/long/queue_long /scratch-shared/tahmad/bio_data/reference/GRCh38_no_alt_analysis_set.fasta /scratch-shared/tahmad/bio_data/long/HG002/ONT/output/ /home/tahmad/tahmad/tools/ 1
+time srun -N 1 -n 1 queue_short reference/GRCh38_no_alt_analysis_set.fasta ONT/output/ tools_path/ 1
 ```
 ### For long-reads
 ```
 #split FASTQ
-/home/tahmad/tahmad/seqkit split2 --threads=128 -1 /scratch-shared/tahmad/bio_data/long/HG002/HG002.fastq -p 8 -O /scratch-shared/tahmad/bio_data/long/HG002/parts -f
+seqkit split2 --threads=128 -1 HG002.fastq -p 8 -O HG002/parts -f
 
 #run MPI minimap2 aligner implementation on cluster
-time srun -N 2 -n 2 /home/tahmad/hawk/new/pc/minimap2-chrms/minimap2 -t 128 -ax map-ont -R '@RG\tID:None\tSM:sample\tPL:Pacbio\tLB:sample\tPU:lane' /scratch-shared/tahmad/bio_data/reference/GRCh38_no_alt_analysis_set.fasta /scratch-shared/tahmad/bio_data/long/HG002/ONT/HG002.fastq > /scratch-shared/tahmad/bio_data/long/HG002/ONT/out.sam
+time srun -N 2 -n 2 minimap2 -t 128 -ax map-ont -R '@RG\tID:None\tSM:sample\tPL:Pacbio\tLB:sample\tPU:lane' reference/GRCh38_no_alt_analysis_set.fasta ONT/HG002.fastq > ONT/out.sam
+
+#Compile the simple `queue_long.c` script which runs the whole variant calling worlflow
+gcc queue_long.c -o queue_long
 
 #run parallel MPI variant calling on cluster
-time srun -N 1 -n 1 ~/hawk/long/queue_long /scratch-shared/tahmad/bio_data/reference/GRCh38_no_alt_analysis_set.fasta /scratch-shared/tahmad/bio_data/long/HG002/ONT/output/ /home/tahmad/tahmad/tools/ 1
+time srun -N 1 -n 1 queue_long reference/GRCh38_no_alt_analysis_set.fasta NT/output/ tools_path/ 1
 ```
 Tanveer Ahmad et al., "GenMPI: Cluster Scalable Variant Calling for Short/Long Reads Sequencing Data", available at: [biorxiv](https://www.biorxiv.org/content/10.1101/2022.04.01.486779v1.full)
