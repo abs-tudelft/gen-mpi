@@ -13,8 +13,6 @@
 #include <dirent.h>
 #include <sys/sysinfo.h>
 
-//CHRMS=['1', '110', '120', '130', '140', '150','160', '170', '180', '190', '2', '210', '220', '230', '240', '250', '260', '270', '280', '290', '3', '31', '32', '33', '34','35','36','37', '4', '41', '42', '43', '44','45','46','47', '5', '51', '52', '53', '54','55','56','57', '6', '61', '62', '63', '64','65','66', '7', '71', '72', '73','74','75','76', '8', '81', '82', '83','84','85', '9', '91', '92', '93','94','95', '10', '101', '102', '103','104','105', '11', '111', '112', '113','114','115', '12', '121', '122', '123','124','125', '13', '131', '132','133','134', '14', '141', '142','143', '15', '151', '152','153', '16', '161', '162','163', '17', '171', '172', '18', '181', '182', '19', '191', '20', '201','202', '21', '211', '22', '221', '23', '231', '232', '233','234','235', '24', '241', '25']
-
 const char *CHRMS[25]={"chr1","chr2","chr3","chr4","chr5","chr6","chr7","chr8","chr9","chr10","chr11","chr12","chr13","chr14","chr15","chr16","chr17","chr18","chr19","chr20","chr21","chr22","chrX","chrY","chrM"};
 
 const char *regions[129]={
@@ -113,26 +111,25 @@ int main(int argc, char *argv[]) {
       fprintf(stderr,"index_cmd: %s\n", index_cmd);
       system(index_cmd);
 
-      sprintf(vc_cmd, "singularity exec /scratch-shared/tahmad/images/clair3_latest.sif /opt/bin/run_clair3.sh --bam_fn=%s%02d.bam --ref_fn=%s --threads=%d --platform=ont --model_path=/opt/models/ont --output=%sclair3/%s --ctg_name=%s", argv[2], file, argv[1], atoi(cores), argv[2], CHRMS[file], CHRMS[file]);
+      sprintf(vc_cmd, "singularity exec clair3_latest.sif /opt/bin/run_clair3.sh --bam_fn=%s%02d.bam --ref_fn=%s --threads=%d --platform=ont --model_path=/opt/models/ont --output=%sclair3/%s --ctg_name=%s", argv[2], file, argv[1], atoi(cores), argv[2], CHRMS[file], CHRMS[file]);
       fprintf(stderr,"vc_cmd: %s\n", vc_cmd);
       system(vc_cmd);
 
       /*
 
-      sprintf(vc_cmd, "singularity run -B /usr/lib/locale/:/usr/lib/locale/ /scratch-shared/tahmad/images/deepvariant_1.1.0.sif /opt/deepvariant/bin/run_deepvariant --model_type PACBIO --ref %s --reads %s%02d.bam --output_vcf %s%s.vcf.gz --intermediate_results_dir %s%s_deepvariant --num_shards %d --regions %s", argv[1], argv[2], file, argv[2], CHRMS[file], argv[2], CHRMS[file], atoi(cores), CHRMS[file]);
-      //sprintf(vc_cmd, "singularity run --nv -B /usr/lib/locale/:/usr/lib/locale/ docker://google/deepvariant:1.2.0-gpu /opt/deepvariant/bin/run_deepvariant --model_type PACBIO --ref %s --reads %s%02d.bam --output_vcf %s%s.vcf.gz --intermediate_results_dir %s%s_deepvariant --num_shards %d --regions %s", argv[1], argv[2], file, argv[2], CHRMS[file], argv[2], CHRMS[file], atoi(cores), CHRMS[file]);
+      sprintf(vc_cmd, "singularity run -B /usr/lib/locale/:/usr/lib/locale/ dv.sif /opt/deepvariant/bin/run_deepvariant --model_type PACBIO --ref %s --reads %s%02d.bam --output_vcf %s%s.vcf.gz --intermediate_results_dir %s%s_deepvariant --num_shards %d --regions %s", argv[1], argv[2], file, argv[2], CHRMS[file], argv[2], CHRMS[file], atoi(cores), CHRMS[file]);
       fprintf(stderr,"vc_cmd: %s\n", vc_cmd);
       system(vc_cmd);
 
-      sprintf(wh_cmd, "singularity exec /home/tahmad/tahmad/singularity/dv.simg /home/tahmad/.local/bin/whatshap phase --output %s%s.phased.vcf.gz --reference %s --chromosome %s %s%s.vcf.gz %s%02d.bam", argv[2], CHRMS[file], argv[1], CHRMS[file], argv[2], CHRMS[file], argv[2], file);
+      sprintf(wh_cmd, "singularity exec dv.simg /home/tahmad/.local/bin/whatshap phase --output %s%s.phased.vcf.gz --reference %s --chromosome %s %s%s.vcf.gz %s%02d.bam", argv[2], CHRMS[file], argv[1], CHRMS[file], argv[2], CHRMS[file], argv[2], file);
       fprintf(stderr,"wh_cmd: %s\n", wh_cmd);
       system(wh_cmd);
 
-      sprintf(tx_cmd, "singularity exec /home/tahmad/tahmad/singularity/dv.simg tabix -p vcf %s%s.phased.vcf.gz", argv[2], CHRMS[file]);
+      sprintf(tx_cmd, "singularity exec dv.simg tabix -p vcf %s%s.phased.vcf.gz", argv[2], CHRMS[file]);
       fprintf(stderr,"tx_cmd: %s\n", tx_cmd);
       system(tx_cmd);
      
-      sprintf(wh_cmd1, "singularity exec /home/tahmad/tahmad/singularity/dv.simg /home/tahmad/.local/bin/whatshap haplotag --output %s%s.haplotagged.bam --reference %s %s%s.phased.vcf.gz %s%02d.bam", argv[2], CHRMS[file], argv[1], argv[2], CHRMS[file], argv[2], file);
+      sprintf(wh_cmd1, "singularity exec dv.simg /home/tahmad/.local/bin/whatshap haplotag --output %s%s.haplotagged.bam --reference %s %s%s.phased.vcf.gz %s%02d.bam", argv[2], CHRMS[file], argv[1], argv[2], CHRMS[file], argv[2], file);
       fprintf(stderr,"wh_cmd1: %s\n", wh_cmd1);
       system(wh_cmd1);
 
@@ -140,7 +137,7 @@ int main(int argc, char *argv[]) {
       fprintf(stderr,"index_cmd1: %s\n", index_cmd1);
       system(index_cmd1);
 
-      sprintf(dv_cmd1, "singularity run -B /usr/lib/locale/:/usr/lib/locale/ /scratch-shared/tahmad/images/deepvariant_1.1.0.sif /opt/deepvariant/bin/run_deepvariant --model_type PACBIO --ref %s --reads %s%s.haplotagged.bam --use_hp_information --output_vcf %s%s.wh.vcf.gz --intermediate_results_dir %s%s_deepvariant1 --num_shards %d --regions %s", argv[1], argv[2], CHRMS[file], argv[2], CHRMS[file], argv[2], CHRMS[file], atoi(cores), CHRMS[file]);
+      sprintf(dv_cmd1, "singularity run -B /usr/lib/locale/:/usr/lib/locale/ deepvariant_1.1.0.sif /opt/deepvariant/bin/run_deepvariant --model_type PACBIO --ref %s --reads %s%s.haplotagged.bam --use_hp_information --output_vcf %s%s.wh.vcf.gz --intermediate_results_dir %s%s_deepvariant1 --num_shards %d --regions %s", argv[1], argv[2], CHRMS[file], argv[2], CHRMS[file], argv[2], CHRMS[file], atoi(cores), CHRMS[file]);
       fprintf(stderr,"dv_cmd1: %s\n", dv_cmd1);
       system(dv_cmd1);
       */
